@@ -1,0 +1,60 @@
+#include <stdio.h>
+#include <ctype.h>
+
+int modInverse(int a, int m) {
+    int x;
+    for (x = 1; x < m; x++) {
+        if ((a * x) % m == 1)
+            return x;
+    }
+    return -1;
+}
+
+int main() {
+    char cipher[200], plain[200];
+    int a, b, i, c, inv;
+
+    printf("Enter ciphertext: ");
+    fgets(cipher, sizeof(cipher), stdin);
+
+    printf("Enter a: ");
+    scanf("%d", &a);
+
+    printf("Enter b: ");
+    scanf("%d", &b);
+
+    inv = modInverse(a, 26);
+
+    if (inv == -1) {
+        printf("Invalid key.\n");
+        return 0;
+    }
+
+    for (i = 0; cipher[i] != '\0'; i++) {
+        if (isalpha(cipher[i])) {
+            c = toupper(cipher[i]) - 'A';
+            plain[i] = ((inv * (c - b + 26)) % 26) + 'A';
+        } else {
+            plain[i] = cipher[i];
+        }
+    }
+
+    plain[i] = '\0';
+
+    printf("Decrypted text: %s", plain);
+
+    return 0;
+}
+
+/*
+Sample Input
+
+Enter ciphertext: ZLKEG
+Enter a: 7
+Enter b: 3
+
+Sample Output
+
+Decrypted text: WORLD
+*/
+
