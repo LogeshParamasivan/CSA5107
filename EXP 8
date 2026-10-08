@@ -1,0 +1,60 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+int main() {
+    char keyword[50], text[100], cipher[27];
+    int used[26] = {0};
+    int i, j = 0;
+
+    printf("Enter keyword: ");
+    scanf("%s", keyword);
+
+    printf("Enter plaintext: ");
+    scanf(" %[^\n]", text);
+
+    for (i = 0; keyword[i] != '\0'; i++) {
+        char ch = toupper(keyword[i]);
+
+        if (!used[ch - 'A']) {
+            cipher[j++] = ch;
+            used[ch - 'A'] = 1;
+        }
+    }
+
+    for (i = 0; i < 26; i++) {
+        if (!used[i])
+            cipher[j++] = 'A' + i;
+    }
+
+    cipher[26] = '\0';
+
+    printf("\nPlain : ABCDEFGHIJKLMNOPQRSTUVWXYZ\n");
+    printf("Cipher: %s\n", cipher);
+
+    printf("Ciphertext: ");
+
+    for (i = 0; text[i] != '\0'; i++) {
+        if (isalpha(text[i])) {
+            char ch = toupper(text[i]);
+            printf("%c", cipher[ch - 'A']);
+        } else {
+            printf("%c", text[i]);
+        }
+    }
+
+    return 0;
+}
+
+/*
+Sample Input
+
+Enter keyword: MONARCHY
+Enter plaintext: HELLO
+
+Sample Output
+
+Plain : ABCDEFGHIJKLMNOPQRSTUVWXYZ
+Cipher: MONARCHYBDEFGIJKLPQSTUVWXZ
+Ciphertext: EIPPS
+*/
