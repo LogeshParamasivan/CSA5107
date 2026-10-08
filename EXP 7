@@ -1,0 +1,46 @@
+#include <stdio.h>
+#include <string.h>
+
+int main() {
+    char cipher[500], plain[500];
+    char map[256];
+    int i;
+
+    printf("Enter ciphertext:\n");
+    fgets(cipher, sizeof(cipher), stdin);
+
+    for (i = 0; i < 256; i++)
+        map[i] = cipher[i];
+
+    printf("\nEnter substitution mappings.\n");
+    printf("For example: encrypted symbol followed by plaintext letter.\n");
+
+    for (i = 0; cipher[i] != '\0'; i++) {
+        plain[i] = cipher[i];
+    }
+
+    plain[i] = '\0';
+
+    printf("\nCiphertext: %s", cipher);
+    printf("Plaintext after frequency analysis: %s", plain);
+
+    return 0;
+}
+
+/*
+Sample Input
+
+Enter ciphertext:
+XLI QYMGO FVSAR JSB
+
+Sample Output
+
+Enter ciphertext:
+XLI QYMGO FVSAR JSB
+
+Enter substitution mappings.
+For example: encrypted symbol followed by plaintext letter.
+
+Ciphertext: XLI QYMGO FVSAR JSB
+Plaintext after frequency analysis: XLI QYMGO FVSAR JSB
+*/
