@@ -1,0 +1,50 @@
+
+#include <stdio.h>
+#include <string.h>
+
+int main() {
+    int key[2][2] = {{9, 4}, {5, 7}};
+    int inv[2][2] = {{5, 12}, {15, 25}};
+    char msg[] = "meet me at the usual place at ten rather than eight oclock";
+    char p[100], c[100], d[100];
+    int i, n = 0, a, b;
+
+    for (i = 0; msg[i]; i++)
+        if (msg[i] >= 'a' && msg[i] <= 'z')
+            p[n++] = msg[i] - 'a' + 'A';
+
+    if (n % 2) p[n++] = 'X';
+    p[n] = '\0';
+
+    for (i = 0; i < n; i += 2) {
+        a = p[i] - 'A';
+        b = p[i + 1] - 'A';
+        c[i] = (key[0][0] * a + key[0][1] * b) % 26 + 'A';
+        c[i + 1] = (key[1][0] * a + key[1][1] * b) % 26 + 'A';
+    }
+    c[n] = '\0';
+
+    for (i = 0; i < n; i += 2) {
+        a = c[i] - 'A';
+        b = c[i + 1] - 'A';
+        d[i] = (inv[0][0] * a + inv[0][1] * b) % 26 + 'A';
+        d[i + 1] = (inv[1][0] * a + inv[1][1] * b) % 26 + 'A';
+    }
+    d[n] = '\0';
+
+    printf("Plaintext: %s\n", p);
+    printf("Ciphertext: %s\n", c);
+    printf("Decrypted text: %s\n", d);
+
+    return 0;
+}
+
+/*
+Sample Input:
+No input required. The plaintext and key are predefined.
+
+Sample Output:
+Plaintext: MEETMEATTHEUSUALPLACEATTENRATHERTHANEIGHTOCLOCKX
+Ciphertext: UKIXUKYDROMEIWSZXWIOKUNUKHXHROAJROANQYEBTLKJEGAD
+Decrypted text: MEETMEATTHEUSUALPLACEATTENRATHERTHANEIGHTOCLOCKX
+*/
