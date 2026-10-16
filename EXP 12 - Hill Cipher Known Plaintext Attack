@@ -1,0 +1,40 @@
+#include <stdio.h>
+
+int main() {
+    char p1[] = "BA", c1[] = "JF";
+    char p2[] = "AB", c2[] = "EH";
+
+    int key[2][2];
+
+    /* BA = (1,0), so its ciphertext gives column 1 */
+    key[0][0] = c1[0] - 'A';
+    key[1][0] = c1[1] - 'A';
+
+    /* AB = (0,1), so its ciphertext gives column 2 */
+    key[0][1] = c2[0] - 'A';
+    key[1][1] = c2[1] - 'A';
+
+    printf("Known Plaintext-Ciphertext Pairs:\n");
+    printf("%s -> %s\n", p1, c1);
+    printf("%s -> %s\n", p2, c2);
+
+    printf("\nRecovered Key Matrix:\n");
+    printf("%d %d\n", key[0][0], key[0][1]);
+    printf("%d %d\n", key[1][0], key[1][1]);
+
+    return 0;
+}
+
+/*
+Sample Input:
+No input required. The known pairs are predefined.
+
+Sample Output:
+Known Plaintext-Ciphertext Pairs:
+BA -> JF
+AB -> EH
+
+Recovered Key Matrix:
+9 4
+5 7
+*/
