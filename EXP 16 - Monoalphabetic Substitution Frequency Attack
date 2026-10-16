@@ -1,0 +1,77 @@
+
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+int main() {
+    char cipher[1000], result[1000];
+    int cf[26] = {0}, used[26] = {0};
+    char english[] = "ETAOINSHRDLCUMWFGYPBVKJXQZ";
+    int i, j, n, top;
+
+    printf("Enter ciphertext: ");
+    fgets(cipher, sizeof(cipher), stdin);
+
+    n = strlen(cipher);
+
+    for (i = 0; i < n; i++)
+        if (isalpha((unsigned char)cipher[i]))
+            cf[toupper((unsigned char)cipher[i]) - 'A']++;
+
+    printf("How many possible plaintexts (1-10)? ");
+    scanf("%d", &top);
+    if (top < 1) top = 1;
+    if (top > 10) top = 10;
+
+    for (int shift = 0; shift < top; shift++) {
+        int map[26];
+        int taken[26] = {0};
+
+        for (i = 0; i < 26; i++) map[i] = -1;
+
+        for (i = 0; i < 26; i++) {
+            int best = -1;
+            for (j = 0; j < 26; j++)
+                if (!used[j] &&
+                    (best == -1 || cf[j] > cf[best]))
+                    best = j;
+
+            if (best != -1) {
+                map[best] = (english[(i + shift) % 26] - 'A');
+                used[best] = 1;
+            }
+        }
+
+        /* Reset frequency selection for the next candidate */
+        for (i = 0; i < 26; i++) used[i] = 0;
+
+        for (i = 0; i < n; i++) {
+            if (isalpha((unsigned char)cipher[i])) {
+                int x = toupper((unsigned char)cipher[i]) - 'A';
+                result[i] = map[x] >= 0 ? map[x] + 'A' : '?';
+                if (islower((unsigned char)cipher[i]))
+                    result[i] = tolower(result[i]);
+            } else {
+                result[i] = cipher[i];
+            }
+        }
+        result[n] = '\0';
+
+        printf("Candidate %d: %s\n", shift + 1, result);
+    }
+
+    return 0;
+}
+
+/*
+Sample Input:
+WKLV LV D WHVW PHVVDJH
+3
+
+Sample Output:
+Enter ciphertext: WKLV LV D WHVW PHVVDJH
+How many possible plaintexts (1-10)? 3
+Candidate 1: ...
+Candidate 2: ...
+Candidate 3: ...
+*/
