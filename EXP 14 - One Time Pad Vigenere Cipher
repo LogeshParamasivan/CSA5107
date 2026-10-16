@@ -1,0 +1,46 @@
+
+#include <stdio.h>
+#include <string.h>
+
+int main() {
+    char p[] = "SENDMOREMONEY";
+    char target[] = "CASHNOTNEEDED";
+    int key[] = {9, 0, 1, 7, 23, 15, 21,
+                 14, 11, 11, 2, 8, 9};
+    int newkey[13], i;
+    char c[14], d[14];
+
+    for (i = 0; i < 13; i++)
+        c[i] = (p[i] - 'A' + key[i]) % 26 + 'A';
+    c[13] = '\0';
+
+    for (i = 0; i < 13; i++) {
+        newkey[i] = (c[i] - target[i] + 26) % 26;
+        d[i] = (c[i] - 'A' - newkey[i] + 26) % 26 + 'A';
+    }
+    d[13] = '\0';
+
+    printf("Plaintext: %s\n", p);
+    printf("Ciphertext: %s\n", c);
+
+    printf("New key stream: ");
+    for (i = 0; i < 13; i++)
+        printf("%d ", newkey[i]);
+
+    printf("\nDecrypted text: %s\n", d);
+
+    return 0;
+}
+
+/*
+Sample Input:
+Plaintext: SEND MORE MONEY
+Key stream: 9 0 1 7 23 15 21 14 11 11 2 8 9
+Target plaintext: CASH NOT NEEDED
+
+Sample Output:
+Plaintext: SENDMOREMONEY
+Ciphertext: BEOKJDMSXZPMH
+New key stream: 25 4 22 3 22 15 19 5 19 21 12 8 4
+Decrypted text: CASHNOTNEEDED
+*/
