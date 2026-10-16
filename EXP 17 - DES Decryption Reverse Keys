@@ -1,0 +1,32 @@
+
+#include <stdio.h>
+#include <string.h>
+#include <openssl/des.h>
+
+int main() {
+    DES_cblock key = {0x13, 0x34, 0x57, 0x79,
+                      0x9B, 0xBC, 0xDF, 0xF1};
+    DES_key_schedule ks;
+    DES_cblock input = {0x85, 0xE8, 0x13, 0x54,
+                        0x0F, 0x0A, 0xB4, 0x05};
+    DES_cblock output;
+
+    DES_set_key_unchecked(&key, &ks);
+    DES_ecb_encrypt(&input, &output, &ks, DES_DECRYPT);
+
+    printf("Decrypted block: ");
+    for (int i = 0; i < 8; i++)
+        printf("%02X", output[i]);
+
+    printf("\n");
+    return 0;
+}
+
+/*
+Sample Input:
+Key:        133457799BBCDFF1
+Ciphertext: 85E813540F0AB405
+
+Sample Output:
+Decrypted block: 0123456789ABCDEF
+*/
