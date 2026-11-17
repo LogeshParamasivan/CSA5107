@@ -1,0 +1,53 @@
+#include <stdio.h>
+#include <string.h>
+#include <openssl/des.h>
+
+void print_hex(const char *label, DES_cblock data)
+{
+    int i;
+    printf("%s", label);
+    for (i = 0; i < 8; i++)
+        printf("%02X", data[i]);
+    printf("\n");
+}
+
+int main()
+{
+    DES_cblock key = {
+        0x13, 0x34, 0x57, 0x79,
+        0x9B, 0xBC, 0xDF, 0xF1
+    };
+
+    DES_cblock plaintext = {
+        0x01, 0x23, 0x45, 0x67,
+        0x89, 0xAB, 0xCD, 0xEF
+    };
+
+    DES_cblock ciphertext;
+    DES_cblock decrypted;
+    DES_key_schedule schedule;
+
+    DES_set_key_unchecked(&key, &schedule);
+
+    printf("DES ENCRYPTION AND DECRYPTION\n");
+    print_hex("Plaintext  : ", plaintext);
+
+    DES_ecb_encrypt(&plaintext, &ciphertext, &schedule, DES_ENCRYPT);
+    print_hex("Ciphertext : ", ciphertext);
+
+    DES_ecb_encrypt(&ciphertext, &decrypted, &schedule, DES_DECRYPT);
+    print_hex("Decrypted  : ", decrypted);
+
+    return 0;
+}
+
+/* ==================== SAMPLE INPUT ==================== */
+(Predefined inside program)
+Plaintext = 0123456789ABCDEF
+Key       = 133457799BBCDFF1
+
+/* ==================== SAMPLE OUTPUT ==================== */
+DES ENCRYPTION AND DECRYPTION
+Plaintext  : 0123456789ABCDEF
+Ciphertext : 85E813540F0AB405
+Decrypted  : 0123456789ABCDEF
