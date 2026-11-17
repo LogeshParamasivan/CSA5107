@@ -1,0 +1,83 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+int gcd(int a, int b)
+{
+    if (b == 0)
+        return a;
+    return gcd(b, a % b);
+}
+
+int modInverse(int a)
+{
+    int i;
+    for (i = 1; i < 26; i++)
+    {
+        if ((a * i) % 26 == 1)
+            return i;
+    }
+    return -1;
+}
+
+int main()
+{
+    char plaintext[100], ciphertext[100], decrypted[100];
+    int a, b, inv, i, p, c, len;
+
+    printf("Enter plaintext: ");
+    scanf("%99s", plaintext);
+    printf("Enter value of a: ");
+    scanf("%d", &a);
+    printf("Enter value of b: ");
+    scanf("%d", &b);
+
+    a = (a % 26 + 26) % 26;
+    b = (b % 26 + 26) % 26;
+
+    if (gcd(a, 26) != 1)
+    {
+        printf("Invalid key! a must be relatively prime to 26.\n");
+        return 1;
+    }
+
+    inv = modInverse(a);
+    len = strlen(plaintext);
+
+    // Encryption
+    for (i = 0; i < len; i++)
+    {
+        if (!isalpha((unsigned char)plaintext[i]))
+        {
+            printf("Enter alphabetic plaintext only.\n");
+            return 1;
+        }
+        p = toupper((unsigned char)plaintext[i]) - 'A';
+        c = (a * p + b) % 26;
+        ciphertext[i] = c + 'A';
+    }
+    ciphertext[len] = '\0';
+
+    // Decryption
+    for (i = 0; i < len; i++)
+    {
+        c = ciphertext[i] - 'A';
+        p = (inv * (c - b + 26)) % 26;
+        decrypted[i] = p + 'A';
+    }
+    decrypted[len] = '\0';
+
+    printf("\nCiphertext: %s", ciphertext);
+    printf("\nDecrypted Text: %s\n", decrypted);
+
+    return 0;
+}
+
+/* ==================== SAMPLE INPUT ==================== */
+Enter plaintext: HELLO
+Enter value of a: 5
+Enter value of b: 8
+
+/* ==================== SAMPLE OUTPUT ==================== */
+Ciphertext: RCLLA
+Decrypted Text: HELLO
