@@ -1,0 +1,122 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX 1000
+
+/* Approximate English letter frequency order */
+char english[] = "ETAOINSHRDLCUMWFGYPBVKJXQZ";
+
+void frequencyAttack(char cipher[], int top)
+{
+    int freq[26] = {0};
+    int i, j, temp;
+    int order[26];
+    char sorted[26];
+    char map[26];
+
+    /* Count letter frequencies */
+    for (i = 0; cipher[i] != '\0'; i++)
+    {
+        if (isalpha((unsigned char)cipher[i]))
+            freq[toupper((unsigned char)cipher[i]) - 'A']++;
+    }
+
+    /* Initialize alphabet indexes */
+    for (i = 0; i < 26; i++)
+        order[i] = i;
+
+    /* Sort letters by decreasing frequency */
+    for (i = 0; i < 25; i++)
+    {
+        for (j = i + 1; j < 26; j++)
+        {
+            if (freq[order[j]] > freq[order[i]])
+            {
+                temp = order[i];
+                order[i] = order[j];
+                order[j] = temp;
+            }
+        }
+    }
+
+    /* Store sorted ciphertext letters */
+    for (i = 0; i < 26; i++)
+        sorted[i] = 'A' + order[i];
+
+    printf("\nTop %d possible plaintexts:\n", top);
+
+    /* Generate candidates by rotating the English frequency ranking */
+    for (int k = 0; k < top; k++)
+    {
+        for (i = 0; i < 26; i++)
+            map[sorted[i] - 'A'] = english[(i + k) % 26];
+
+        printf("\nCandidate %d: ", k + 1);
+        for (i = 0; cipher[i] != '\0'; i++)
+        {
+            if (isalpha((unsigned char)cipher[i]))
+            {
+                char ch = map[toupper((unsigned char)cipher[i]) - 'A'];
+                if (islower((unsigned char)cipher[i]))
+                    putchar(tolower((unsigned char)ch));
+                else
+                    putchar(ch);
+            }
+            else
+            {
+                putchar(cipher[i]);
+            }
+        }
+        printf("\n");
+    }
+}
+
+int main()
+{
+    char cipher[MAX];
+    int top;
+
+    printf("Enter encrypted text:\n");
+    fgets(cipher, MAX, stdin);
+
+    printf("Enter number of possible plaintexts: ");
+    scanf("%d", &top);
+
+    if (top < 1)
+        top = 1;
+    if (top > 26)
+        top = 26;
+
+    frequencyAttack(cipher, top);
+
+    return 0;
+}
+
+/* ==================== SAMPLE INPUT ==================== */
+Enter encrypted text:
+WKH TXLFN EURZQ IRA MXPSV RYHU WKH ODCB GRJ
+Enter number of possible plaintexts: 10
+
+/* ==================== SAMPLE OUTPUT ==================== */
+Top 10 possible plaintexts:
+
+Candidate 1: IAT BNCXM JOEZG REH UNFPK EQTO IAT WVYL SED
+
+Candidate 2: NOA VSUQW XITEY DTR MSGBJ TZAI NOA FKPC HTL
+
+Candidate 3: SIO KHMZF QNATP LAD WHYVX AEON SIO GJBU RAC
+
+Candidate 4: HNI JRWEG ZSOAB COL FRPKQ OTIS HNI YXVM DOU
+
+Candidate 5: RSN XDFTY EHIOV UIC GDBJZ IANH RSN PQKW LIM
+
+Candidate 6: DHS QLGAP TRNIK MNU YLVXE NOSR DHS BZJF CNW
+
+Candidate 7: LRH ZCYOB ADSNJ WSM PCKOT SIHD LRH VEXG USF
+
+Candidate 8: CDR EUPIV OLHSX FHW BUJZA HNRL CDR KTQY MHG
+
+Candidate 9: ULD TMBNK ICRHQ GRF VMXEO RSDC ULD JAZP WRY
+
+Candidate 10: MCL AWVSJ NUDRZ YDG KWOTI DHLU MCL XOEB FDP
