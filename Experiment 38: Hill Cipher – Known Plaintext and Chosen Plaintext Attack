@@ -1,0 +1,115 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+int mod26(int n)
+{
+    return (n % 26 + 26) % 26;
+}
+
+/* Find multiplicative inverse modulo 26 */
+int modInverse(int n)
+{
+    int i;
+    for (i = 1; i < 26; i++)
+    {
+        if ((n * i) % 26 == 1)
+            return i;
+    }
+    return -1;
+}
+
+int main()
+{
+    char p1[3], p2[3];
+    char c1[3], c2[3];
+    int P[2][2], C[2][2];
+    int K[2][2], inv[2][2];
+    int det, detInv;
+    int i, j;
+
+    printf("Enter first plaintext block: ");
+    scanf("%s", p1);
+    printf("Enter its ciphertext block: ");
+    scanf("%s", c1);
+
+    printf("Enter second plaintext block: ");
+    scanf("%s", p2);
+    printf("Enter its ciphertext block: ");
+    scanf("%s", c2);
+
+    /* Validate and convert letters */
+    for (i = 0; i < 2; i++)
+    {
+        if (!isalpha((unsigned char)p1[i]) ||
+            !isalpha((unsigned char)p2[i]) ||
+            !isalpha((unsigned char)c1[i]) ||
+            !isalpha((unsigned char)c2[i]))
+        {
+            printf("Invalid input. Use letters A-Z only.\n");
+            return 1;
+        }
+    }
+
+    /* Plaintext matrix */
+    P[0][0] = toupper(p1[0]) - 'A';
+    P[1][0] = toupper(p1[1]) - 'A';
+    P[0][1] = toupper(p2[0]) - 'A';
+    P[1][1] = toupper(p2[1]) - 'A';
+
+    /* Ciphertext matrix */
+    C[0][0] = toupper(c1[0]) - 'A';
+    C[1][0] = toupper(c1[1]) - 'A';
+    C[0][1] = toupper(c2[0]) - 'A';
+    C[1][1] = toupper(c2[1]) - 'A';
+
+    /* Calculate determinant */
+    det = mod26(P[0][0] * P[1][1] - P[0][1] * P[1][0]);
+    detInv = modInverse(det);
+
+    if (detInv == -1)
+    {
+        printf("\nPlaintext matrix is not invertible modulo 26.\n");
+        printf("Choose different plaintext blocks.\n");
+        return 1;
+    }
+
+    /* Calculate inverse of P modulo 26 */
+    inv[0][0] = mod26(detInv * P[1][1]);
+    inv[0][1] = mod26(-detInv * P[0][1]);
+    inv[1][0] = mod26(-detInv * P[1][0]);
+    inv[1][1] = mod26(detInv * P[0][0]);
+
+    /* Calculate K = C * inverse(P) modulo 26 */
+    for (i = 0; i < 2; i++)
+    {
+        for (j = 0; j < 2; j++)
+        {
+            K[i][j] = mod26(
+                C[i][0] * inv[0][j] +
+                C[i][1] * inv[1][j]
+            );
+        }
+    }
+
+    printf("\nRecovered Hill Cipher Key Matrix:\n");
+    for (i = 0; i < 2; i++)
+    {
+        for (j = 0; j < 2; j++)
+            printf("%d ", K[i][j]);
+        printf("\n");
+    }
+
+    return 0;
+}
+
+/* ==================== SAMPLE INPUT ==================== */
+Enter first plaintext block: BA
+Enter its ciphertext block: DC
+Enter second plaintext block: AB
+Enter its ciphertext block: DF
+
+/* ==================== SAMPLE OUTPUT ==================== */
+Recovered Hill Cipher Key Matrix:
+3 3 
+2 5
