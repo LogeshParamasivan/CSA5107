@@ -1,0 +1,137 @@
+#include <stdio.h>
+#include <string.h>
+#include <openssl/evp.h>
+
+#define BLOCK_SIZE 16
+#define MAX_SIZE 1024
+
+unsigned char key[16] = {
+    0x2B, 0x7E, 0x15, 0x16, 0x28, 0xAE, 0xD2, 0xA6,
+    0xAB, 0xF7, 0x15, 0x88, 0x09, 0xCF, 0x4F, 0x3C
+};
+
+unsigned char iv[16] = {
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
+};
+
+void print_hex(char *label, unsigned char *data, int len)
+{
+    int i;
+    printf("%s", label);
+    for (i = 0; i < len; i++)
+        printf("%02X", data[i]);
+    printf("\n");
+}
+
+int process(int mode, int encrypt, unsigned char *input, int len, unsigned char *output)
+{
+    EVP_CIPHER_CTX *ctx;
+    const EVP_CIPHER *cipher;
+    int out1 = 0, out2 = 0, ok;
+
+    if (mode == 1)
+        cipher = EVP_aes_128_ecb();
+    else if (mode == 2)
+        cipher = EVP_aes_128_cbc();
+    else
+        cipher = EVP_aes_128_cfb128();
+
+    ctx = EVP_CIPHER_CTX_new();
+    if (ctx == NULL)
+        return -1;
+
+    ok = EVP_CipherInit_ex(ctx, cipher, NULL, key, mode == 1 ? NULL : iv, encrypt);
+    if (ok != 1) goto error;
+
+    EVP_CIPHER_CTX_set_padding(ctx, 0);
+
+    ok = EVP_CipherUpdate(ctx, output, &out1, input, len);
+    if (ok != 1) goto error;
+
+    ok = EVP_CipherFinal_ex(ctx, output + out1, &out2);
+    if (ok != 1) goto error;
+
+    EVP_CIPHER_CTX_free(ctx);
+    return out1 + out2;
+
+error:
+    EVP_CIPHER_CTX_free(ctx);
+    return -1;
+}
+
+int main()
+{
+    unsigned char plaintext[MAX_SIZE];
+    unsigned char padded[MAX_SIZE + BLOCK_SIZE];
+    unsigned char ciphertext[MAX_SIZE + BLOCK_SIZE];
+    unsigned char decrypted[MAX_SIZE + BLOCK_SIZE];
+    int len, pad, padded_len, mode;
+    int cipher_len, dec_len, i;
+
+    printf("Enter plaintext: ");
+    if (fgets((char *)plaintext, MAX_SIZE, stdin) == NULL)
+        return 1;
+
+    len = strlen((char *)plaintext);
+    if (len > 0 && plaintext[len - 1] == '\n')
+        len--;
+
+    if (len == 0) {
+        printf("Empty plaintext!\n");
+        return 1;
+    }
+
+    printf("\n1. ECB Mode\n2. CBC Mode\n3. CFB Mode");
+    printf("\nSelect mode: ");
+    if (scanf("%d", &mode) != 1 || mode < 1 || mode > 3) {
+        printf("Invalid mode!\n");
+        return 1;
+    }
+
+    // Apply 0x80 followed by zero padding
+    pad = BLOCK_SIZE - (len % BLOCK_SIZE);
+    memcpy(padded, plaintext, len);
+    padded[len] = 0x80;
+    for (i = 1; i < pad; i++)
+        padded[len + i] = 0x00;
+    padded_len = len + pad;
+
+    print_hex("\nPadded Plaintext: ", padded, padded_len);
+
+    cipher_len = process(mode, 1, padded, padded_len, ciphertext);
+    if (cipher_len < 0) {
+        printf("Encryption failed!\n");
+        return 1;
+    }
+    print_hex("Ciphertext: ", ciphertext, cipher_len);
+
+    dec_len = process(mode, 0, ciphertext, cipher_len, decrypted);
+    if (dec_len < 0) {
+        printf("Decryption failed!\n");
+        return 1;
+    }
+
+    i = dec_len - 1;
+    while (i >= 0 && decrypted[i] == 0x00)
+        i--;
+
+    if (i < 0 || decrypted[i] != 0x80) {
+        printf("Invalid padding!\n");
+        return 1;
+    }
+
+    printf("Decrypted Text: ");
+    fwrite(decrypted, 1, i, stdout);
+    printf("\n");
+
+    return 0;
+}
+
+/* ==================== SAMPLE INPUT ==================== */
+Enter plaintext: HELLO WORLD
+Select mode: 2
+
+/* ==================== SAMPLE OUTPUT ==================== */
+Padded Plaintext: 48454C4C4F20574F524C448000000000
+Ciphertext: 249897635A6783D913DBEC65B2DA49BE
+Decrypted Text: HELLO WORLD
