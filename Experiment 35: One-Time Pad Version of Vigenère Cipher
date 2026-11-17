@@ -1,0 +1,60 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <time.h>
+#include <ctype.h>
+
+int main()
+{
+    char plaintext[100], ciphertext[100];
+    char decrypted[100];
+    int key[100];
+    int i, len;
+
+    printf("Enter plaintext (A-Z): ");
+    scanf("%99s", plaintext);
+
+    len = strlen(plaintext);
+    srand((unsigned int)time(NULL));
+
+    // Generate random key
+    printf("\nRandom Key: ");
+    for (i = 0; i < len; i++)
+    {
+        key[i] = rand() % 26;
+        printf("%d ", key[i]);
+    }
+
+    // Encryption
+    for (i = 0; i < len; i++)
+    {
+        plaintext[i] = toupper((unsigned char)plaintext[i]);
+        if (plaintext[i] < 'A' || plaintext[i] > 'Z')
+        {
+            printf("\nOnly alphabetic letters are allowed.\n");
+            return 1;
+        }
+        ciphertext[i] = ((plaintext[i] - 'A' + key[i]) % 26) + 'A';
+    }
+    ciphertext[len] = '\0';
+
+    // Decryption
+    for (i = 0; i < len; i++)
+    {
+        decrypted[i] = ((ciphertext[i] - 'A' - key[i] + 26) % 26) + 'A';
+    }
+    decrypted[len] = '\0';
+
+    printf("\nCiphertext: %s", ciphertext);
+    printf("\nDecrypted Text: %s\n", decrypted);
+
+    return 0;
+}
+
+/* ==================== SAMPLE INPUT ==================== */
+Enter plaintext (A-Z): HELLO
+
+/* ==================== SAMPLE OUTPUT ==================== */
+Random Key: 18 25 5 8 22
+Ciphertext: ZDQTK
+Decrypted Text: HELLO
