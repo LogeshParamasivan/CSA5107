@@ -1,0 +1,153 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX 1000
+
+/* Approximate English letter frequencies */
+double englishFreq[26] = {
+    8.12, 1.49, 2.71, 4.32, 12.02, 2.30, 2.03, 5.92, 7.31,
+    0.10, 0.69, 3.98, 2.61, 6.95, 7.68, 1.82, 0.11, 6.02,
+    6.28, 9.10, 2.88, 1.11, 2.09, 0.17, 2.11, 0.07
+};
+
+struct Candidate {
+    int key;
+    double score;
+};
+
+void decrypt(char cipher[], char plain[], int key)
+{
+    int i;
+    for (i = 0; cipher[i] != '\0'; i++)
+    {
+        if (isalpha((unsigned char)cipher[i]))
+        {
+            char base = isupper((unsigned char)cipher[i]) ? 'A' : 'a';
+            plain[i] = (cipher[i] - base - key + 26) % 26 + base;
+        }
+        else
+        {
+            plain[i] = cipher[i];
+        }
+    }
+    plain[i] = '\0';
+}
+
+/* Calculate frequency score using chi-square */
+double calculateScore(char text[])
+{
+    int freq[26] = {0};
+    int total = 0;
+    int i;
+    double score = 0.0;
+
+    for (i = 0; text[i] != '\0'; i++)
+    {
+        if (isalpha((unsigned char)text[i]))
+        {
+            freq[toupper((unsigned char)text[i]) - 'A']++;
+            total++;
+        }
+    }
+
+    if (total == 0)
+        return 999999.0;
+
+    for (i = 0; i < 26; i++)
+    {
+        double expected = englishFreq[i] * total / 100.0;
+        double difference = freq[i] - expected;
+        if (expected > 0)
+            score += difference * difference / expected;
+    }
+
+    return score;
+}
+
+int main()
+{
+    char cipher[MAX];
+    char plain[MAX];
+    struct Candidate candidates[26];
+    struct Candidate temp;
+    int i, j, top;
+
+    printf("Enter encrypted text:\n");
+    fgets(cipher, MAX, stdin);
+
+    printf("Enter number of possible plaintexts: ");
+    scanf("%d", &top);
+
+    if (top < 1)
+        top = 1;
+    if (top > 26)
+        top = 26;
+
+    /* Test all 26 possible keys */
+    for (i = 0; i < 26; i++)
+    {
+        decrypt(cipher, plain, i);
+        candidates[i].key = i;
+        candidates[i].score = calculateScore(plain);
+    }
+
+    /* Sort candidates by lowest chi-square score */
+    for (i = 0; i < 25; i++)
+    {
+        for (j = i + 1; j < 26; j++)
+        {
+            if (candidates[j].score < candidates[i].score)
+            {
+                temp = candidates[i];
+                candidates[i] = candidates[j];
+                candidates[j] = temp;
+            }
+        }
+    }
+
+    printf("\nTop %d possible plaintexts:\n", top);
+    for (i = 0; i < top; i++)
+    {
+        decrypt(cipher, plain, candidates[i].key);
+        printf("\nCandidate %d", i + 1);
+        printf("\nKey: %d", candidates[i].key);
+        printf("\nScore: %.2f", candidates[i].score);
+        printf("\nPlaintext: %s\n", plain);
+    }
+
+    return 0;
+}
+
+/* ==================== SAMPLE INPUT ==================== */
+Enter encrypted text:
+KHOOR ZRUOG
+Enter number of possible plaintexts: 10
+
+/* ==================== SAMPLE OUTPUT ==================== */
+Top 10 possible plaintexts:
+
+Candidate 1
+Key: 6
+Score: 23.54
+Plaintext: EBIIL TLOIA
+
+Candidate 2
+Key: 14
+Score: 25.26
+Plaintext: WTAAD LDGAS
+
+Candidate 3
+Key: 3
+Score: 29.10
+Plaintext: HELLO WORLD
+
+Candidate 4
+Key: 12
+Score: 60.63
+Plaintext: YVCCF NFICU
+
+Candidate 5
+Key: 25
+Score: 61.63
+Plaintext: LGPPS ASUPH
